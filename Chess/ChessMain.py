@@ -4,6 +4,7 @@ import sys
 
 WIDTH = HEIGHT = 480
 DIMENSION = 8
+
 SQUARE_SIZE = HEIGHT // DIMENSION
 
 MAX_FPS = 15
@@ -50,12 +51,14 @@ def main():
                     player_clicks.append(square_selected)
                 if len(player_clicks) == 2:
                     move = ChessEngine.Move(player_clicks[0], player_clicks[1], game_state.board)
-                    print(move.getChessNotation())
                     if move in valid_moves:
+                        print(move.getChessNotation())
                         game_state.makeMove(move)
                         move_made = True
                     square_selected = ()
                     player_clicks = []
+                else:
+                    player_clicks = [square_selected]
 
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_z:
