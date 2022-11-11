@@ -1,5 +1,6 @@
 import pygame as p
 from Chess import ChessEngine
+import sys
 
 WIDTH = HEIGHT = 480
 DIMENSION = 8
@@ -22,7 +23,11 @@ def main():
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
     game_state = ChessEngine.GameState()
+    valid_moves = game_state.getValidMoves()
+    move_made = False
+
     loadImages()
+
     running = True
     square_selected = ()
     player_clicks = []
@@ -32,6 +37,7 @@ def main():
             if e.type == p.QUIT:
                 running = False
                 p.quit()
+                sys.exit()
             elif e.type == p.MOUSEBUTTONDOWN:
                 location = p.mouse.get_pos()
                 col = location[0] // SQUARE_SIZE
@@ -45,10 +51,20 @@ def main():
                 if len(player_clicks) == 2:
                     move = ChessEngine.Move(player_clicks[0], player_clicks[1], game_state.board)
                     print(move.getChessNotation())
-                    print(move.piece_moved)
-                    game_state.makeMove(move)
+                    if move in valid_moves:
+                        game_state.makeMove(move)
+                        move_made = True
                     square_selected = ()
                     player_clicks = []
+
+            elif e.type == p.KEYDOWN:
+                if e.key == p.K_z:
+                    game_state.undoMove()
+                    move_made = True
+
+        if move_made:
+            valid_moves = game_state.getValidMoves()
+            move_made = False
 
         drawGameState(screen, game_state)
         clock.tick(MAX_FPS)
