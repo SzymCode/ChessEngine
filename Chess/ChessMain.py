@@ -1,6 +1,5 @@
 import pygame as p
 from Chess import ChessEngine
-import sys
 
 WIDTH = HEIGHT = 480
 DIMENSION = 8
@@ -25,16 +24,35 @@ def main():
     game_state = ChessEngine.GameState()
     loadImages()
     running = True
+    square_selected = ()
+    player_clicks = []
+
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
                 p.quit()
-                sys.exit()
+            elif e.type == p.MOUSEBUTTONDOWN:
+                location = p.mouse.get_pos()
+                col = location[0] // SQUARE_SIZE
+                row = location[1] // SQUARE_SIZE
+                if square_selected == (row, col):
+                    square_selected = ()
+                    player_clicks = []
+                else:
+                    square_selected = (row, col)
+                    player_clicks.append(square_selected)
+                if len(player_clicks) == 2:
+                    move = ChessEngine.Move(player_clicks[0], player_clicks[1], game_state.board)
+                    print(move.getChessNotation())
+                    print(move.piece_moved)
+                    game_state.makeMove(move)
+                    square_selected = ()
+                    player_clicks = []
 
+        drawGameState(screen, game_state)
         clock.tick(MAX_FPS)
         p.display.flip()
-        drawGameState(screen, game_state)
 
 
 def drawGameState(screen, game_state):
@@ -46,8 +64,8 @@ def drawBoard(screen):
     colors = [p.Color("white"), p.Color("gray")]
     for row in range(DIMENSION):
         for column in range(DIMENSION):
-            color = colors[((row + column) % 2)]
-            p.draw.rect(screen, color, p.Rect(column * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+            color = colors[((row+column) % 2)]
+            p.draw.rect(screen, color, p.Rect(column*SQUARE_SIZE, row*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
 
 def drawPieces(screen, board):
@@ -55,7 +73,7 @@ def drawPieces(screen, board):
         for column in range(DIMENSION):
             piece = board[row][column]
             if piece != "--":
-                screen.blit(IMAGES[piece], p.Rect(column * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                screen.blit(IMAGES[piece], p.Rect(column*SQUARE_SIZE, row*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
 
 if __name__ == "__main__":
