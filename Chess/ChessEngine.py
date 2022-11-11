@@ -66,7 +66,23 @@ class GameState:
                     moves.append(Move((row, col), (row+1, col+1), self.board))
 
     def getRookMoves(self, row, col, moves):
-        pass
+        directions = ((-1, 0), (0, -1), (1, 0), (0, 1))
+        enemy_color = "b" if self.white_to_move else "w"
+        for direction in directions:
+            for i in range(1,8):
+                end_row = row + direction[0] * i
+                end_col = col + direction[1] * i
+                if 0 <= end_row <= 7 and 0 <= end_col <= 7:
+                    end_piece = self.board[end_row][end_col]
+                    if end_piece == "--":
+                        moves.append(Move((row, col), (end_row, end_col), self.board))
+                    elif end_piece[0] == enemy_color:
+                        moves.append(Move((row, col), (end_row, end_col), self.board))
+                        break
+                    else:
+                        break
+                else:
+                    break
 
     def getKnightMoves(self, row, col, moves):
         pass
