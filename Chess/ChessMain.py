@@ -1,5 +1,5 @@
 import pygame as p
-from Chess import ChessEngine
+import ChessEngine
 import sys
 
 WIDTH = HEIGHT = 480
@@ -25,9 +25,7 @@ def main():
     game_state = ChessEngine.GameState()
     valid_moves = game_state.getValidMoves()
     move_made = False
-
     loadImages()
-
     running = True
     square_selected = ()
     player_clicks = []
@@ -50,12 +48,15 @@ def main():
                     player_clicks.append(square_selected)
                 if len(player_clicks) == 2:
                     move = ChessEngine.Move(player_clicks[0], player_clicks[1], game_state.board)
-                    if move in valid_moves:
-                        print(move.getChessNotation())
-                        game_state.makeMove(move)
-                        move_made = True
-                    square_selected = ()
-                    player_clicks = []
+                    for i in range(len(valid_moves)):
+                        if move == valid_moves[i]:
+                            print(move.getChessNotation())
+                            game_state.makeMove(valid_moves[i])
+                            move_made = True
+                            square_selected = ()
+                            player_clicks = []
+                    if not move_made:
+                        player_clicks = [square_selected]
 
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_z:
@@ -80,7 +81,7 @@ def drawBoard(screen):
     colors = [p.Color("white"), p.Color("gray")]
     for row in range(DIMENSION):
         for column in range(DIMENSION):
-            color = colors[((row+column) % 2)]
+            color = colors[((row + column) % 2)]
             p.draw.rect(screen, color, p.Rect(column*SQUARE_SIZE, row*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
 
