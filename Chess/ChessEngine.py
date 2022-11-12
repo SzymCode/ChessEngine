@@ -13,13 +13,19 @@ class GameState:
                               "B": self.getBishopMoves, "Q": self.getQueenMoves, "K": self.getKingMoves}
         self.white_to_move = True
         self.move_log = []
+        self.white_king_location = (7, 4)
+        self.black_king_location = (0, 4)
 
     def makeMove(self, move):
-
         self.board[move.start_row][move.start_col] = "--"
         self.board[move.end_row][move.end_col] = move.piece_moved
         self.move_log.append(move)
         self.white_to_move = not self.white_to_move
+
+        if move.piece_moved == "wK":
+            self.white_king_location = (move.end_row, move.end_col)
+        elif move.piece_moved == "bK":
+            self.black_king_location = (move.end_row, move.end_col)
 
     def undoMove(self):
         if len(self.move_log) != 0:
@@ -28,8 +34,27 @@ class GameState:
             self.board[move.end_row][move.end_col] = move.piece_captured
             self.white_to_move = not self.white_to_move
 
+            if move.piece_moved == "wK":
+                self.white_king_location = (move.start_row, move.start_col)
+            elif move.piece_moved == "bK":
+                self.black_king_location = (move.start_row, move.start_col)
+
     def getValidMoves(self):
-        return self.getAllPossibleMoves()
+        moves = self.getAllPossibleMoves()
+        for i in range(len(moves) - 1, -1, -1):
+            self.makeMove(moves[i])
+            self.white_to_move = not self.white_to_move
+            if self.inCheck():
+                moves.remove(moves[i])
+            self.white_to_move = not self.white_to_move
+            self.undoMove()
+        return moves
+
+    def inCheck(self):
+        if self.white_to_move:
+            return self.squareUnderAttack(self.white_king_location[0], self.white_king_location[1])
+        else:
+            return self.squareUnderAttack(self.black_king_location[0], self.black_king_location[1])
 
     def getAllPossibleMoves(self):
         moves = []
@@ -40,6 +65,15 @@ class GameState:
                     piece = self.board[row][col][1]
                     self.moveFunctions[piece](row, col, moves)
         return moves
+
+    def squareUnderAttack(self, row, col):
+        self.white_to_move = not self.white_to_move
+        opponents_moves = self.getAllPossibleMoves()
+        self.white_to_move = not self.white_to_move
+        for move in opponents_moves:
+            if move.end_row == row and move.end_col == col:
+                return True
+        return False
 
     def getPawnMoves(self, row, col, moves):
         if self.white_to_move:
@@ -147,6 +181,7 @@ class Move:
         self.piece_moved = board[self.start_row][self.start_col]
         self.piece_captured = board[self.end_row][self.end_col]
         self.moveID = self.start_row * 1000 + self.start_col * 100 + self.end_row * 10 + self.end_col
+
 
     def __eq__(self, other):
         if isinstance(other, Move):
