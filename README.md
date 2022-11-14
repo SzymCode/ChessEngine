@@ -19,9 +19,10 @@ pip install pygame
 
 ## Usage
 • Press `z` to undo a move.
+
 • Press `r` to reset the game.
 
 
 # Preview image
 
-![app_preview](https://github.com/SzymCode/ChessEngine/blob/main/images/preview.png)
+![app_preview](https://github.com/SzymCode/ChessEngine/blob/main/Chess/images/preview.png)
