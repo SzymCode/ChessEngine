@@ -12,8 +12,8 @@ IMAGES = {}
 
 
 def loadImages():
-    programIcon = p.image.load('images/bN.png')
-    p.display.set_icon(programIcon)
+    program_icon = p.image.load('images/bN.png')
+    p.display.set_icon(program_icon)
     pieces = ['wp', 'wR', 'wN', 'wB', 'wK', 'wQ', 'bp', 'bR', 'bN', 'bB', 'bK', 'bQ']
     for piece in pieces:
         IMAGES[piece] = p.transform.scale(p.image.load("images/" + piece + ".png"), (SQUARE_SIZE, SQUARE_SIZE))
@@ -35,6 +35,13 @@ def main():
     square_selected = ()
     player_clicks = []
     game_over = False
+
+    white_did_check = ""
+    black_did_check = ""
+    last_move_printed = False
+    moves_list = []
+
+    turn = 1
 
     while running:
         for e in p.event.get():
@@ -58,18 +65,37 @@ def main():
                         for i in range(len(valid_moves)):
                             if move == valid_moves[i]:
                                 game_state.makeMove(valid_moves[i])
+                                if game_state.checkForPinsAndChecks()[0]:
+                                    if not game_state.white_to_move:
+                                        white_did_check = "+"
+                                    else:
+                                        black_did_check = "+"
                                 move_made = True
                                 animate = True
                                 square_selected = ()
                                 player_clicks = []
+                                if game_state.white_to_move:
+                                    moves_list.append(f"\n{turn}. {game_state.move_log[-2].getChessNotation()}"
+                                        f"{white_did_check} {game_state.move_log[-1].getChessNotation()}{black_did_check}")
+
+                                    print(f"\n{turn}. {game_state.move_log[-2].getChessNotation()}{white_did_check} "
+                                        f"{game_state.move_log[-1].getChessNotation()}{black_did_check}", end="")
+
+                                    turn += 1
+                                    white_did_check = ""
+                                    black_did_check = ""
                         if not move_made:
                             player_clicks = [square_selected]
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_z:
+                    if game_state.white_to_move:
+                        if turn > 1:
+                            turn -= 1
                     game_state.undoMove()
                     move_made = True
                     animate = False
                     game_over = False
+                    last_move_printed = False
                 if e.key == p.K_r:
                     game_state = ChessEngine.GameState()
                     valid_moves = game_state.getValidMoves()
@@ -78,6 +104,9 @@ def main():
                     move_made = False
                     animate = False
                     game_over = False
+                    turn = 1
+                    last_move_printed = False
+                    moves_list = []
 
         if move_made:
             if animate:
@@ -88,15 +117,37 @@ def main():
 
         drawGameState(screen, game_state, valid_moves, square_selected)
 
-        if game_state.checkmate:
+        if game_state.check_mate:
             game_over = True
             if game_state.white_to_move:
                 drawText(screen, "Black wins by checkmate")
+                if not last_move_printed:
+                    moves_list[-1] += "+"
+                    moves_list.append("result: 0-1")
+                    print("+")
+                    print("result: 0-1")
+                    last_move_printed = True
+                    saveGame(moves_list)
             else:
                 drawText(screen, "White wins by checkmate")
-        elif game_state.stalemate:
+                if not last_move_printed:
+                    moves_list.append(f"\n{turn}. {game_state.move_log[-1].getChessNotation()}++")
+                    moves_list.append("result: 1-0")
+                    print(f"\n{turn}. {game_state.move_log[-1].getChessNotation()}++")
+                    print("result: 1-0")
+                    last_move_printed = True
+                    saveGame(moves_list)
+        elif game_state.stale_mate:
             game_over = True
             drawText(screen, "Stalemate")
+            if not last_move_printed:
+                if not game_state.white_to_move():
+                    moves_list.append(f"\n{turn}. {game_state.move_log[-1].getChessNotation()}")
+                    moves_list.append("result: 1/2-1/2")
+                    print(f"\n{turn}. {game_state.move_log[-1].getChessNotation()}")
+                    print("result: 1/2-1/2")
+                    last_move_printed = True
+                    saveGame(moves_list)
 
         clock.tick(MAX_FPS)
         p.display.flip()
@@ -108,6 +159,22 @@ def drawText(screen, text):
     text_location = p.Rect(0, 0, WIDTH, HEIGHT).move(WIDTH / 2 - text_object.get_width() / 2,
                                                      HEIGHT / 2 - text_object.get_height() / 2)
     screen.blit(text_object, text_location.move(2, 2))
+
+
+def saveGame(moves_list):
+    result = moves_list.pop()
+    turns_dict = {}
+    for i in range(len(moves_list)-1, -1, -1):
+        try:
+            if int(moves_list[i][1]) not in turns_dict:
+                turns_dict[moves_list[i][1]] = moves_list[i][1:]+"\n"
+        except:
+            pass
+    file = open("game_logs.txt", "w")
+    for turn in sorted(turns_dict.keys()):
+        file.write(turns_dict[turn])
+    file.write(result)
+    file.close()
 
 
 def highlightSquares(screen, game_state, valid_moves, square_selected):
@@ -157,7 +224,7 @@ def animateMove(move, screen, board, clock):
     global colors
     d_row = move.end_row - move.start_row
     d_col = move.end_col - move.start_col
-    frames_per_square = 5
+    frames_per_square = 3
     frame_count = (abs(d_row) + abs(d_col)) * frames_per_square
     for frame in range(frame_count + 1):
         row, col = (move.start_row + d_row * frame / frame_count, move.start_col + d_col * frame / frame_count)
