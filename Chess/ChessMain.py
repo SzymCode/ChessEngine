@@ -2,6 +2,8 @@ import pygame as p
 import ChessEngine
 import sys
 
+from Chess import ChessAI
+
 WIDTH = HEIGHT = 480
 DIMENSION = 8
 SQUARE_SIZE = HEIGHT // DIMENSION
@@ -40,17 +42,19 @@ def main():
     black_did_check = ""
     last_move_printed = False
     moves_list = []
-
+    player_one = False
+    player_two = False
     turn = 1
 
     while running:
+        human_turn = (game_state.white_to_move and player_one) or (not game_state.white_to_move and player_two)
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
                 p.quit()
                 sys.exit()
             elif e.type == p.MOUSEBUTTONDOWN:
-                if not game_over:
+                if not game_over and human_turn:
                     location = p.mouse.get_pos()
                     col = location[0] // SQUARE_SIZE
                     row = location[1] // SQUARE_SIZE
@@ -65,25 +69,10 @@ def main():
                         for i in range(len(valid_moves)):
                             if move == valid_moves[i]:
                                 game_state.makeMove(valid_moves[i])
-                                if game_state.checkForPinsAndChecks()[0]:
-                                    if not game_state.white_to_move:
-                                        white_did_check = "+"
-                                    else:
-                                        black_did_check = "+"
                                 move_made = True
                                 animate = True
                                 square_selected = ()
                                 player_clicks = []
-                                if game_state.white_to_move:
-                                    moves_list.append(f"\n{turn}. {game_state.move_log[-2].getChessNotation()}"
-                                        f"{white_did_check} {game_state.move_log[-1].getChessNotation()}{black_did_check}")
-
-                                    print(f"\n{turn}. {game_state.move_log[-2].getChessNotation()}{white_did_check} "
-                                        f"{game_state.move_log[-1].getChessNotation()}{black_did_check}", end="")
-
-                                    turn += 1
-                                    white_did_check = ""
-                                    black_did_check = ""
                         if not move_made:
                             player_clicks = [square_selected]
             elif e.type == p.KEYDOWN:
@@ -108,7 +97,26 @@ def main():
                     last_move_printed = False
                     moves_list = []
 
+        if not game_over and not human_turn:
+            AI_move = ChessAI.findRandomMove(valid_moves)
+            game_state.makeMove(AI_move)
+            move_made = True
+            animate = True
+
         if move_made:
+            if game_state.checkForPinsAndChecks()[0]:
+                if not game_state.white_to_move:
+                    white_did_check = "+"
+                else:
+                    black_did_check = "+"
+            if game_state.white_to_move:
+                moves_list.append(f"\n{turn}. {game_state.move_log[-2].getChessNotation()}{white_did_check} "
+                                  f"{game_state.move_log[-1].getChessNotation()}{black_did_check}")
+                print(f"\n{turn}. {game_state.move_log[-2].getChessNotation()}{white_did_check} "
+                      f"{game_state.move_log[-1].getChessNotation()}{black_did_check}", end="")
+                turn += 1
+                white_did_check = ""
+                black_did_check = ""
             if animate:
                 animateMove(game_state.move_log[-1], screen, game_state.board, clock)
             valid_moves = game_state.getValidMoves()
@@ -164,11 +172,12 @@ def drawText(screen, text):
 def saveGame(moves_list):
     result = moves_list.pop()
     turns_dict = {}
-    for i in range(len(moves_list)-1, -1, -1):
+    for i in range(len(moves_list) - 1, -1, -1):
+        # noinspection PyBroadException
         try:
             if int(moves_list[i][1]) not in turns_dict:
-                turns_dict[moves_list[i][1]] = moves_list[i][1:]+"\n"
-        except:
+                turns_dict[moves_list[i][1]] = moves_list[i][1:] + "\n"
+        except Exception:
             pass
     file = open("game_logs.txt", "w")
     for turn in sorted(turns_dict.keys()):
@@ -209,7 +218,7 @@ def drawBoard(screen):
     for row in range(DIMENSION):
         for column in range(DIMENSION):
             color = colors[((row + column) % 2)]
-            p.draw.rect(screen, color, p.Rect(column*SQUARE_SIZE, row*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+            p.draw.rect(screen, color, p.Rect(column * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
 
 def drawPieces(screen, board):
@@ -217,7 +226,7 @@ def drawPieces(screen, board):
         for column in range(DIMENSION):
             piece = board[row][column]
             if piece != "--":
-                screen.blit(IMAGES[piece], p.Rect(column*SQUARE_SIZE, row*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                screen.blit(IMAGES[piece], p.Rect(column * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
 
 def animateMove(move, screen, board, clock):
