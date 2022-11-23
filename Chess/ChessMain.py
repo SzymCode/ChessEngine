@@ -101,7 +101,7 @@ def main():
                     moves_list = []
 
         if not game_over and not human_turn:
-            AI_move = ChessAI.findRandomMove(valid_moves)
+            AI_move = ChessAI.findBestMove(game_state, valid_moves)
             if AI_move is None:
                 AI_move = ChessAI.findRandomMove(valid_moves)
             game_state.makeMove(AI_move, True)
