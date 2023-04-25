@@ -4,7 +4,10 @@ I highly encourage you to visit his YouTube channel and check the whole series b
 
 [First episode of "Chess engine in Python"](https://www.youtube.com/watch?v=EnYui0e73Rs&ab_channel=EddieSharick)
 
-## 🛠️ Installation:
+
+
+<details><summary> <h2> 🛠️ Installation:  </summary> 
+
 • Install pygame
 
 ```bash
@@ -14,12 +17,17 @@ pip install pygame
 • Clone this repository.
 
 • Run ChessMain.py
+</details>
 
 
-## ❓ Usage:
+
+<details><summary> <h2> ❓ Usage:  </summary> 
+
 • Press `z` to undo a move.
 
 • Press `r` to reset the game.
+</details>
+
 
 
 ## Preview image
