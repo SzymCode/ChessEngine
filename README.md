@@ -6,7 +6,7 @@ I highly encourage you to visit his YouTube channel and check the whole series b
 
 
 
-<details><summary> <h2> 🛠️ Installation:  </summary> 
+<details><summary> <h2> 🛠️ Installation  </summary> 
 
 • Clone this repository
 
@@ -23,7 +23,7 @@ pip install pygame
 
 
 
-<details><summary> <h2> ❓ Usage:  </summary> 
+<details><summary> <h2> ❓ Usage  </summary> 
 
 • Press `z` to undo a move
 
