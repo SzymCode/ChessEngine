@@ -1,4 +1,4 @@
-# ChessEngine
+# ChessEngine <div> [![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/) </div>
 ChessEngine made with Pygame library mainly by following a step-by-step YouTube tutorial by Eddie Sharick, sometimes coming up with some improvements on my own.
 I highly encourage you to visit his YouTube channel and check the whole series by yourself.
 
@@ -8,24 +8,28 @@ I highly encourage you to visit his YouTube channel and check the whole series b
 
 <details><summary> <h2> 🛠️ Installation:  </summary> 
 
+• Clone this repository
+
 • Install pygame
 
 ```bash
 pip install pygame
 ```
 
-• Clone this repository.
-
 • Run ChessMain.py
+
+<hr/>
 </details>
 
 
 
 <details><summary> <h2> ❓ Usage:  </summary> 
 
-• Press `z` to undo a move.
+• Press `z` to undo a move
 
-• Press `r` to reset the game.
+• Press `r` to reset the game
+
+<hr/>
 </details>
 
 
